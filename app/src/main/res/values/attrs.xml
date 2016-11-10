@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="EasyInputView">
+        <attr name="eivTextSize" format="dimension"/>
+        <attr name="eivTextColor" format="color"/>
+        <attr name="eivTextInstead" format="string"/>
+        <attr name="eivFillColor" format="color"/>
+        <attr name="eivSingleWidth" format="dimension"/>
+        <attr name="eivSingleHeight" format="dimension"/>
+        <attr name="eivTextMax" format="integer"/>
+    </declare-styleable>
+
+</resources>
