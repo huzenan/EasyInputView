@@ -11,4 +11,14 @@
         <attr name="eivTextMax" format="integer"/>
     </declare-styleable>
 
+    <declare-styleable name="EasyKeyboard">
+        <attr name="ekbHeightRatio" format="float"/>
+        <attr name="ekbTextSize" format="dimension"/>
+        <attr name="ekbTextColor" format="color"/>
+        <attr name="ekbTextColorPressed" format="color"/>
+        <attr name="ekbBgColor" format="color"/>
+        <attr name="ekbBgColorPressed" format="color"/>
+        <attr name="ekbKeyHeight" format="dimension"/>
+    </declare-styleable>
+
 </resources>

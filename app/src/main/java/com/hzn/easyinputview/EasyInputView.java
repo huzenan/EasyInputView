@@ -8,7 +8,6 @@ import android.graphics.Paint;
 import android.text.TextPaint;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 
@@ -16,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * 带输入动画的输入框，例如可用于输入密码，卡号等
  * Created by huzn on 2016/11/10.
  */
 public class EasyInputView extends View {
@@ -44,7 +44,11 @@ public class EasyInputView extends View {
     private List<String> dataList;
     private int curLen;
     private int speed;
-    private boolean needRefill;
+
+    private static final int ACTION_IDLE = 0;
+    private static final int ACTION_ADD = 1;
+    private static final int ACTION_REMOVE = 2;
+    private int curAction = ACTION_IDLE;
 
     public EasyInputView(Context context) {
         this(context, null);
@@ -86,7 +90,6 @@ public class EasyInputView extends View {
         dataList = new ArrayList<>();
         curLen = 0;
         speed = singleWidth / 5;
-        needRefill = false;
     }
 
     @Override
@@ -104,8 +107,8 @@ public class EasyInputView extends View {
             height = singleHeight + getPaddingTop() + getPaddingBottom();
         }
 
-        startX = getPaddingLeft();
-        startY = getPaddingTop();
+        startX = width / 2 - contentWidth / 2;
+        startY = height / 2 - singleHeight / 2;
 
         setMeasuredDimension(width, height);
     }
@@ -134,9 +137,9 @@ public class EasyInputView extends View {
         if (TextUtils.isEmpty(str) || dataList.size() >= textMax)
             return;
 
-        if (null != dataList) {
+        if (null != dataList && (curAction == ACTION_ADD || curAction == ACTION_IDLE)) {
+            curAction = ACTION_ADD;
             dataList.add(str);
-            needRefill = true;
             startAnimation();
         }
     }
@@ -145,9 +148,9 @@ public class EasyInputView extends View {
         if (null == dataList || dataList.size() <= 0)
             return;
 
-        if (null != dataList) {
+        if (null != dataList && (curAction == ACTION_REMOVE || curAction == ACTION_IDLE)) {
+            curAction = ACTION_REMOVE;
             dataList.remove(dataList.size() - 1);
-            needRefill = true;
             startAnimation();
         }
     }
@@ -159,13 +162,10 @@ public class EasyInputView extends View {
 
             @Override
             public void run() {
-                if (needRefill) {
-                    needRefill = false;
-                    if (dir > 0)
-                        curLen = (dataList.size() - 1) * singleWidth;
-                    else if (dir < 0)
-                        curLen = (dataList.size() + 1) * singleWidth;
-                }
+                if (dir > 0)
+                    curLen = (dataList.size() - 1) * singleWidth;
+                else if (dir < 0)
+                    curLen = (dataList.size() + 1) * singleWidth;
 
                 while ((dir > 0 && curLen < nowLen) || (dir < 0 && curLen > nowLen)) {
                     try {
@@ -174,13 +174,16 @@ public class EasyInputView extends View {
                         if ((dir > 0 && curLen > nowLen) || (dir < 0 && curLen < nowLen))
                             curLen = nowLen;
 
-                        Thread.sleep(500);
+                        Thread.sleep(20);
 
                         postInvalidate();
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
                 }
+
+                if (curLen == nowLen)
+                    curAction = ACTION_IDLE;
             }
         }).start();
     }
