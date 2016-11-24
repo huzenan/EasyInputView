@@ -133,6 +133,11 @@ public class EasyInputView extends View {
         }
     }
 
+    /**
+     * 添加一个字符，字符达到最大值后，不做任何操作
+     *
+     * @param str 要添加的字符
+     */
     public void add(String str) {
         if (TextUtils.isEmpty(str) || dataList.size() >= textMax)
             return;
@@ -144,6 +149,9 @@ public class EasyInputView extends View {
         }
     }
 
+    /**
+     * 删除当前最后一个字符，字符达到最小值后，不做任何操作
+     */
     public void remove() {
         if (null == dataList || dataList.size() <= 0)
             return;

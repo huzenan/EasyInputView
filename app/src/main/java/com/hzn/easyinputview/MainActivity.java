@@ -1,13 +1,14 @@
 package com.hzn.easyinputview;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.Button;
+import android.support.v7.app.AppCompatActivity;
+
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
     private EasyInputView inputView;
+    private EasyKeyboard keyboard;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -18,20 +19,31 @@ public class MainActivity extends AppCompatActivity {
 
     private void initViews() {
         inputView = (EasyInputView) findViewById(R.id.input_view);
-
-        Button btnAdd = (Button) findViewById(R.id.btn_add);
-        btnAdd.setOnClickListener(new View.OnClickListener() {
+        keyboard = (EasyKeyboard) findViewById(R.id.key_board);
+        final ArrayList<String> dataList = keyboard.getDataList();
+        keyboard.setOnEasyKeyListener(new EasyKeyboard.onEasyKeyListener() {
             @Override
-            public void onClick(View v) {
-                inputView.add("a");
+            public void onKeyDown(int index) {
+
             }
-        });
 
-        Button btnRemove = (Button) findViewById(R.id.btn_remove);
-        btnRemove.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                inputView.remove();
+            public void onKeyCancel(int index) {
+
+            }
+
+            @Override
+            public void onKeyUp(int index) {
+                if (index == 0) {
+                    // 功能键
+
+                } else if (index == dataList.size() - 1) {
+                    // 回退
+                    inputView.remove();
+                } else {
+                    // 数字
+                    inputView.add(dataList.get(index));
+                }
             }
         });
     }
