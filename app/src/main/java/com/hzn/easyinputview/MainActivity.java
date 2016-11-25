@@ -40,9 +40,13 @@ public class MainActivity extends AppCompatActivity {
                 } else if (index == dataList.size() - 1) {
                     // 回退
                     inputView.remove();
+                    if (inputView.getCurLength() < inputView.getTextMax())
+                        keyboard.setDisableKeys(1, 11, false);
                 } else {
                     // 数字
                     inputView.add(dataList.get(index));
+                    if (inputView.getCurLength() >= inputView.getTextMax())
+                        keyboard.setDisableKeys(1, 11, true);
                 }
             }
         });

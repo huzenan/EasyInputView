@@ -9,6 +9,12 @@
         <attr name="eivSingleWidth" format="dimension"/>
         <attr name="eivSingleHeight" format="dimension"/>
         <attr name="eivTextMax" format="integer"/>
+        <attr name="eivSeparateNum" format="integer"/>
+        <attr name="eivSeparateWidth" format="dimension"/>
+        <attr name="eivTextMode" format="enum">
+            <enum name="normal" value="0"/>
+            <enum name="separate" value="1"/>
+        </attr>
     </declare-styleable>
 
     <declare-styleable name="EasyKeyboard">
@@ -16,11 +22,14 @@
         <attr name="ekbTextSize" format="dimension"/>
         <attr name="ekbTextColor" format="color"/>
         <attr name="ekbTextColorPressed" format="color"/>
+        <attr name="ekbTextColorDisable" format="color"/>
         <attr name="ekbKeyTextSize" format="dimension"/>
         <attr name="ekbKeyTextColor" format="color"/>
         <attr name="ekbKeyTextColorPressed" format="color"/>
+        <attr name="ekbKeyTextColorDisable" format="color"/>
         <attr name="ekbBgColor" format="color"/>
         <attr name="ekbBgColorPressed" format="color"/>
+        <attr name="ekbBgColorDisable" format="color"/>
         <attr name="ekbKeyHeight" format="dimension"/>
     </declare-styleable>
 

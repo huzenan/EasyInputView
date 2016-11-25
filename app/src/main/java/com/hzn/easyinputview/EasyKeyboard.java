@@ -35,16 +35,22 @@ public class EasyKeyboard extends View {
     private int textColor;
     // 文字按下颜色，默认Color.BLACK
     private int textColorPressed;
+    // 文字禁按状态下颜色，默认Color.LTGRAY
+    private int textColorDisable;
     // 功能键字体大小，默认20sp
     private int keyTextSize;
     // 功能键字体颜色，默认Color.BLACK
     private int keyTextColor;
     // 功能键字体按下颜色，默认Color.BLACK
     private int keyTextColorPressed;
+    // 功能键文字禁按状态下颜色，默认Color.LTGRAY
+    private int keyTextColorDisable;
     // 背景色，默认Color.WHITE
     private int bgColor;
     // 键盘按下颜色，默认Color.LTGRAY
     private int bgColorPressed;
+    // 键盘禁按状态下颜色，默认Color.WHITE
+    private int bgColorDisable;
     // 功能键高度，默认50dp
     private int keyHeight;
 
@@ -79,6 +85,8 @@ public class EasyKeyboard extends View {
 
     private Map<Integer, Integer> pressedMap;
 
+    private ArrayList<Integer> disableList;
+
     public EasyKeyboard(Context context) {
         this(context, null);
     }
@@ -95,12 +103,15 @@ public class EasyKeyboard extends View {
                 TypedValue.COMPLEX_UNIT_SP, 25, getResources().getDisplayMetrics()));
         textColor = a.getColor(R.styleable.EasyKeyboard_ekbTextColor, Color.BLACK);
         textColorPressed = a.getColor(R.styleable.EasyKeyboard_ekbTextColorPressed, Color.BLACK);
+        textColorDisable = a.getColor(R.styleable.EasyKeyboard_ekbTextColorDisable, Color.LTGRAY);
         keyTextSize = a.getDimensionPixelSize(R.styleable.EasyKeyboard_ekbKeyTextSize, (int) TypedValue.applyDimension(
                 TypedValue.COMPLEX_UNIT_SP, 20, getResources().getDisplayMetrics()));
         keyTextColor = a.getColor(R.styleable.EasyKeyboard_ekbKeyTextColor, Color.BLACK);
         keyTextColorPressed = a.getColor(R.styleable.EasyKeyboard_ekbKeyTextColorPressed, Color.BLACK);
+        keyTextColorDisable = a.getColor(R.styleable.EasyKeyboard_ekbKeyTextColorDisable, Color.LTGRAY);
         bgColor = a.getColor(R.styleable.EasyKeyboard_ekbBgColor, Color.WHITE);
         bgColorPressed = a.getColor(R.styleable.EasyKeyboard_ekbBgColorPressed, Color.LTGRAY);
+        bgColorDisable = a.getColor(R.styleable.EasyKeyboard_ekbBgColorDisable, Color.WHITE);
         keyHeight = a.getDimensionPixelSize(R.styleable.EasyKeyboard_ekbKeyHeight, (int) TypedValue.applyDimension(
                 TypedValue.COMPLEX_UNIT_DIP, 50, getResources().getDisplayMetrics()));
         a.recycle();
@@ -136,6 +147,7 @@ public class EasyKeyboard extends View {
         initDefaultDataList(len);
 
         pressedMap = new HashMap<>();
+        disableList = new ArrayList<>();
     }
 
     private void initDefaultDataList(int len) {
@@ -188,7 +200,13 @@ public class EasyKeyboard extends View {
         paint.setColor(bgColor);
         canvas.drawRect(0, 0, width, height, paint);
 
-        // 按下部分
+        // 禁用部分背景
+        paint.setColor(bgColorDisable);
+        for (Integer index : disableList)
+            canvas.drawRect(rects[index], paint);
+        paint.setColor(bgColor);
+
+        // 按下部分背景
         Collection<Integer> pressedIndexes = pressedMap.values();
         paint.setColor(bgColorPressed);
         for (Integer index : pressedIndexes) {
@@ -203,6 +221,8 @@ public class EasyKeyboard extends View {
 
             if (pressedIndexes.contains(0))
                 keyTextPaint.setColor(keyTextColorPressed);
+            else if (disableList.contains(0))
+                keyTextPaint.setColor(keyTextColorDisable);
             else
                 keyTextPaint.setColor(keyTextColor);
 
@@ -218,6 +238,8 @@ public class EasyKeyboard extends View {
 
                 if (pressedIndexes.contains(index))
                     textPaint.setColor(textColorPressed);
+                else if (disableList.contains(index))
+                    textPaint.setColor(textColorDisable);
                 else
                     textPaint.setColor(textColor);
 
@@ -240,6 +262,10 @@ public class EasyKeyboard extends View {
                     int downX = (int) event.getX(pointerId);
                     int downY = (int) event.getY(pointerId);
                     int index = getNewPointIndex(downX, downY);
+
+                    if (disableList.contains(index))
+                        return false;
+
                     if (index != -1) {
                         pressedMap.put(pointerId, index);
 
@@ -329,6 +355,48 @@ public class EasyKeyboard extends View {
 
     public ArrayList<String> getDataList() {
         return dataList;
+    }
+
+    /**
+     * 设置单个禁用的按键
+     *
+     * @param index   要禁用的按键下标
+     * @param disable true为禁用，false为不禁用
+     */
+    public void setDisableKey(Integer index, boolean disable) {
+        if (index < 0 || index >= lines * columns + 1)
+            return;
+
+        if (!disableList.contains(index)) {
+            if (disable)
+                disableList.add(index);
+            else
+                disableList.remove(index);
+        }
+
+        invalidate();
+    }
+
+    /**
+     * 设置禁用的按键集
+     *
+     * @param startIndex 禁用按键集下标起始
+     * @param endIndex   禁用按键集下标结束
+     * @param disable    true为禁用，false为不禁用
+     */
+    public void setDisableKeys(Integer startIndex, Integer endIndex, boolean disable) {
+        if (startIndex > endIndex || startIndex < 0 || endIndex >= lines * columns + 1)
+            return;
+
+        disableList.clear();
+        for (Integer i = startIndex; i <= endIndex; i++) {
+            if (disable)
+                disableList.add(i);
+            else
+                disableList.remove(i);
+        }
+
+        invalidate();
     }
 
     /**

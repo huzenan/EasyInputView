@@ -8,29 +8,6 @@
     tools:context="com.hzn.easyinputview.MainActivity"
     >
 
-    <com.hzn.easyinputview.EasyInputView
-        android:id="@+id/input_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="100dp"
-        custom:eivFillColor="#66cccc"
-        custom:eivSingleHeight="40dp"
-        custom:eivSingleWidth="40dp"
-        custom:eivTextColor="#ffffff"
-        custom:eivTextMax="8"
-        custom:eivTextSize="25sp"
-        />
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_alignLeft="@id/input_view"
-        android:layout_alignRight="@id/input_view"
-        android:layout_below="@id/input_view"
-        android:background="#66cccc"
-        />
-
     <com.hzn.easyinputview.EasyKeyboard
         android:id="@+id/key_board"
         android:layout_width="wrap_content"
@@ -40,4 +17,36 @@
         custom:ekbKeyTextColorPressed="#ffffff"
         custom:ekbTextColorPressed="#ffffff"
         />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/key_board"
+        >
+
+        <com.hzn.easyinputview.EasyInputView
+            android:id="@+id/input_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            custom:eivFillColor="#66cccc"
+            custom:eivTextMode="separate"
+            custom:eivSeparateNum="4"
+            custom:eivSeparateWidth="15dp"
+            custom:eivSingleHeight="30dp"
+            custom:eivSingleWidth="20dp"
+            custom:eivTextColor="#ffffff"
+            custom:eivTextMax="16"
+            custom:eivTextSize="25dp"
+            />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_alignLeft="@id/input_view"
+            android:layout_alignRight="@id/input_view"
+            android:layout_below="@id/input_view"
+            android:background="#66cccc"
+            />
+    </RelativeLayout>
 </RelativeLayout>

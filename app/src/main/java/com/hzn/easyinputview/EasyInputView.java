@@ -34,6 +34,17 @@ public class EasyInputView extends View {
     private int textMax;
     // 替代的文字，例如用于密码输入可以设置为 "*"，默认为空
     private String textInstead;
+    // 每多少字符进行一次分隔，默认4
+    private int separateNum;
+    // 间隔的距离，默认10dp
+    private int separateWidth;
+    // 模式，默认normal
+    private int textMode;
+
+    // 正常模式
+    private static final int MODE_NORMAL = 0;
+    // 分离模式（例如用于银行卡号的显示）
+    private static final int MODE_SEPARATE = 1;
 
     private Paint paint;
     private TextPaint textPaint;
@@ -71,6 +82,10 @@ public class EasyInputView extends View {
         singleHeight = a.getDimensionPixelSize(R.styleable.EasyInputView_eivSingleHeight, (int) TypedValue.applyDimension(
                 TypedValue.COMPLEX_UNIT_DIP, -1, getResources().getDisplayMetrics()));
         textMax = a.getInteger(R.styleable.EasyInputView_eivTextMax, 4);
+        separateNum = a.getInteger(R.styleable.EasyInputView_eivSeparateNum, 4);
+        separateWidth = a.getDimensionPixelSize(R.styleable.EasyInputView_eivSeparateWidth, (int) TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP, 10, getResources().getDisplayMetrics()));
+        textMode = a.getInteger(R.styleable.EasyInputView_eivTextMode, MODE_NORMAL);
         a.recycle();
 
         paint = new Paint();
@@ -97,6 +112,9 @@ public class EasyInputView extends View {
         int mode = MeasureSpec.getMode(widthMeasureSpec);
         int width = MeasureSpec.getSize(widthMeasureSpec);
         int contentWidth = textMax * singleWidth;
+        if (textMode == MODE_SEPARATE) {
+            contentWidth += ((textMax - 1) / separateNum) * separateWidth;
+        }
         if (mode != MeasureSpec.EXACTLY) { // wrap_content
             width = contentWidth + getPaddingLeft() + getPaddingRight();
         }
@@ -128,7 +146,12 @@ public class EasyInputView extends View {
                     str = textInstead;
 
                 int textWidth = (int) textPaint.measureText(str);
-                canvas.drawText(str, startX + singleWidth * i + singleWidth / 2 - textWidth / 2, baseLine, textPaint);
+                int x = startX + singleWidth * i + singleWidth / 2 - textWidth / 2;
+
+                if (textMode == MODE_SEPARATE)
+                    x += (i / separateNum) * separateWidth;
+
+                canvas.drawText(str, x, baseLine, textPaint);
             }
         }
     }
@@ -163,17 +186,46 @@ public class EasyInputView extends View {
         }
     }
 
+    /**
+     * 获取当前字符长度
+     *
+     * @return 当前字符长度
+     */
+    public int getCurLength() {
+        if (null == dataList || dataList.size() <= 0)
+            return -1;
+
+        return dataList.size();
+    }
+
+    /**
+     * 获取字符最大长度
+     *
+     * @return 字符最大长度
+     */
+    public int getTextMax() {
+        return textMax;
+    }
+
     private void startAnimation() {
         new Thread(new Runnable() {
-            private int nowLen = dataList.size() * singleWidth;
-            private float dir = Math.signum(nowLen - curLen);
+            private int nowLen;
+            private float dir;
 
             @Override
             public void run() {
+                int size = dataList.size();
+
+                nowLen = dataList.size() * singleWidth;
+                if (textMode == MODE_SEPARATE)
+                    nowLen += ((size - 1) / separateNum) * separateWidth;
+
+                dir = Math.signum(nowLen - curLen);
+
                 if (dir > 0)
-                    curLen = (dataList.size() - 1) * singleWidth;
+                    curLen = nowLen - singleWidth;
                 else if (dir < 0)
-                    curLen = (dataList.size() + 1) * singleWidth;
+                    curLen = nowLen + singleWidth;
 
                 while ((dir > 0 && curLen < nowLen) || (dir < 0 && curLen > nowLen)) {
                     try {
