@@ -22,8 +22,10 @@ public class EasyInputView extends View {
 
     // 文字大小，默认16sp
     private int textSize;
-    // 文字颜色，默认Color.WHITE
+    // 文字颜色，默认Color.BLACK
     private int textColor;
+    // 文字在填充状态时的颜色，默认Color.WHITE
+    private int textFillColor;
     // 填充颜色，默认Color.GRAY
     private int fillColor;
     // 单个方块宽，大于等于2倍文字宽，默认为2倍文字宽
@@ -34,19 +36,37 @@ public class EasyInputView extends View {
     private int textMax;
     // 替代的文字，例如用于密码输入可以设置为 "*"，默认为空
     private String textInstead;
+    // 底部线条颜色，默认不显示线条
+    private int strokeColor;
+    // 底部线条填充时颜色，默认不显示线条
+    private int strokeFillColor;
+    // 底部线条粗细，默认1dp
+    private int strokeWidth;
+    // 底部线条相对于字符的间隔，默认0
+    private int strokePadding;
     // 每多少字符进行一次分隔，默认4
     private int separateNum;
     // 间隔的距离，默认10dp
     private int separateWidth;
     // 模式，默认normal
     private int textMode;
+    // 填充模式，默认normal
+    private int fillMode;
 
     // 正常模式
     private static final int MODE_NORMAL = 0;
     // 分离模式（例如用于银行卡号的显示）
     private static final int MODE_SEPARATE = 1;
 
+    // 正常填充模式，当填充满后，填充色消失
+    private static final int FILL_MODE_NORMAL = 0;
+    // 填充色总是不消失模式
+    private static final int FILL_MODE_ALWAYS = 1;
+    // 无填充色
+    private static final int FILL_MODE_NONE = 2;
+
     private Paint paint;
+    private Paint strokePaint;
     private TextPaint textPaint;
     private Paint.FontMetrics fm;
     private int startX;
@@ -60,6 +80,7 @@ public class EasyInputView extends View {
     private static final int ACTION_ADD = 1;
     private static final int ACTION_REMOVE = 2;
     private int curAction = ACTION_IDLE;
+    private int contentWidth;
 
     public EasyInputView(Context context) {
         this(context, null);
@@ -74,8 +95,15 @@ public class EasyInputView extends View {
         TypedArray a = context.getTheme().obtainStyledAttributes(attrs, R.styleable.EasyInputView, defStyleAttr, 0);
         textSize = a.getDimensionPixelSize(R.styleable.EasyInputView_eivTextSize, (int) TypedValue.applyDimension(
                 TypedValue.COMPLEX_UNIT_SP, 16, getResources().getDisplayMetrics()));
-        textColor = a.getColor(R.styleable.EasyInputView_eivTextColor, Color.WHITE);
+        textColor = a.getColor(R.styleable.EasyInputView_eivTextColor, Color.BLACK);
+        textFillColor = a.getColor(R.styleable.EasyInputView_eivTextFillColor, Color.WHITE);
         textInstead = a.getString(R.styleable.EasyInputView_eivTextInstead);
+        strokeColor = a.getColor(R.styleable.EasyInputView_eivStrokeColor, -1);
+        strokeFillColor = a.getColor(R.styleable.EasyInputView_eivStrokeFillColor, -1);
+        strokeWidth = a.getDimensionPixelSize(R.styleable.EasyInputView_eivStrokeWidth, (int) TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP, 1, getResources().getDisplayMetrics()));
+        strokePadding = a.getDimensionPixelSize(R.styleable.EasyInputView_eivStrokePadding, (int) TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP, 0, getResources().getDisplayMetrics()));
         fillColor = a.getColor(R.styleable.EasyInputView_eivFillColor, Color.GRAY);
         singleWidth = a.getDimensionPixelSize(R.styleable.EasyInputView_eivSingleWidth, (int) TypedValue.applyDimension(
                 TypedValue.COMPLEX_UNIT_DIP, -1, getResources().getDisplayMetrics()));
@@ -86,15 +114,19 @@ public class EasyInputView extends View {
         separateWidth = a.getDimensionPixelSize(R.styleable.EasyInputView_eivSeparateWidth, (int) TypedValue.applyDimension(
                 TypedValue.COMPLEX_UNIT_DIP, 10, getResources().getDisplayMetrics()));
         textMode = a.getInteger(R.styleable.EasyInputView_eivTextMode, MODE_NORMAL);
+        fillMode = a.getInteger(R.styleable.EasyInputView_eivFillMode, FILL_MODE_NORMAL);
         a.recycle();
 
         paint = new Paint();
         paint.setStyle(Paint.Style.FILL);
         paint.setColor(fillColor);
+        strokePaint = new Paint();
+        strokePaint.setStyle(Paint.Style.STROKE);
+        strokePaint.setColor(strokeColor);
+        strokePaint.setStrokeWidth(strokeWidth);
         textPaint = new TextPaint();
         textPaint.setAntiAlias(true);
         textPaint.setTextSize(textSize);
-        textPaint.setColor(textColor);
         fm = textPaint.getFontMetrics();
 
         int textWidth = (int) textPaint.measureText("t");
@@ -111,7 +143,7 @@ public class EasyInputView extends View {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int mode = MeasureSpec.getMode(widthMeasureSpec);
         int width = MeasureSpec.getSize(widthMeasureSpec);
-        int contentWidth = textMax * singleWidth;
+        contentWidth = textMax * singleWidth;
         if (textMode == MODE_SEPARATE) {
             contentWidth += ((textMax - 1) / separateNum) * separateWidth;
         }
@@ -128,18 +160,46 @@ public class EasyInputView extends View {
         startX = width / 2 - contentWidth / 2;
         startY = height / 2 - singleHeight / 2;
 
+        if (strokeColor != -1)
+            height = height + strokeWidth + strokePadding;
+
         setMeasuredDimension(width, height);
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         if (null != dataList && dataList.size() >= 0) {
-            // 绘制填充层
-            canvas.drawRect(startX, startY, startX + curLen, startY + singleHeight, paint);
+            int size = dataList.size();
+            // 改变颜色
+            if (size > 0 &&
+                    (fillMode == FILL_MODE_ALWAYS ||
+                            (size < textMax || size == textMax && startX + curLen < contentWidth))) {
+                // 绘制填充层
+                if (fillMode != FILL_MODE_NONE)
+                    canvas.drawRect(startX, startY, startX + curLen, startY + singleHeight, paint);
+
+                // 底部线条
+                if (strokeColor != -1 && strokeFillColor != -1)
+                    strokePaint.setColor(strokeFillColor);
+
+                // 文字
+                if (fillMode != FILL_MODE_NONE)
+                    textPaint.setColor(textFillColor);
+                else
+                    textPaint.setColor(textColor);
+            } else {
+                // 底部线条
+                strokePaint.setColor(strokeColor);
+
+                // 文字
+                textPaint.setColor(textColor);
+            }
+
+            // 绘制底部线条
+            canvas.drawLine(startX, startY + singleHeight + strokePadding, startX + contentWidth, startY + singleHeight + strokePadding, strokePaint);
 
             // 绘制文字
-            float baseLine = getHeight() / 2 - (fm.ascent + fm.descent) / 2;
-            int size = dataList.size();
+            float baseLine = (getHeight() - strokeWidth - strokePadding) / 2 - (fm.ascent + fm.descent) / 2;
             for (int i = 0; i < size; i++) {
                 String str = dataList.get(i);
                 if (!TextUtils.isEmpty(textInstead))
@@ -184,6 +244,15 @@ public class EasyInputView extends View {
             dataList.remove(dataList.size() - 1);
             startAnimation();
         }
+    }
+
+    /**
+     * 获取已输入的字符
+     *
+     * @return 已输入的字符List
+     */
+    public List<String> getDataList() {
+        return dataList;
     }
 
     /**

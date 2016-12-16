@@ -13,40 +13,53 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        custom:ekbBgColorPressed="#66cccc"
+        custom:ekbBackKeyDrawable="@mipmap/back"
+        custom:ekbBgColorPressed="#08588d"
+        custom:ekbInitState="hide"
         custom:ekbKeyTextColorPressed="#ffffff"
         custom:ekbTextColorPressed="#ffffff"
         />
 
     <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_above="@id/key_board"
+        android:id="@+id/rl_card"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="40dp"
+        android:background="@drawable/bg_card"
+        android:paddingBottom="30dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:paddingTop="15dp"
         >
 
-        <com.hzn.easyinputview.EasyInputView
-            android:id="@+id/input_view"
+        <ImageView
+            android:id="@+id/iv_icon_visa"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            custom:eivFillColor="#66cccc"
-            custom:eivTextMode="separate"
-            custom:eivSeparateNum="4"
-            custom:eivSeparateWidth="15dp"
-            custom:eivSingleHeight="30dp"
-            custom:eivSingleWidth="20dp"
-            custom:eivTextColor="#ffffff"
-            custom:eivTextMax="16"
-            custom:eivTextSize="25dp"
+            android:src="@mipmap/icon_visa"
             />
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_alignLeft="@id/input_view"
-            android:layout_alignRight="@id/input_view"
-            android:layout_below="@id/input_view"
-            android:background="#66cccc"
+        <com.hzn.easyinputview.EasyInputView
+            android:id="@+id/eiv_card"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/iv_icon_visa"
+            custom:eivFillColor="#08588d"
+            custom:eivFillMode="normal"
+            custom:eivSeparateNum="4"
+            custom:eivSeparateWidth="12dp"
+            custom:eivSingleHeight="28dp"
+            custom:eivSingleWidth="18dp"
+            custom:eivStrokeColor="#cacaca"
+            custom:eivStrokeFillColor="#08588d"
+            custom:eivStrokePadding="0dp"
+            custom:eivStrokeWidth="1dp"
+            custom:eivTextColor="#999999"
+            custom:eivTextFillColor="#ffffff"
+            custom:eivTextMax="16"
+            custom:eivTextMode="separate"
+            custom:eivTextSize="20dp"
             />
     </RelativeLayout>
 </RelativeLayout>

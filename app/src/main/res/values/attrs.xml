@@ -4,7 +4,12 @@
     <declare-styleable name="EasyInputView">
         <attr name="eivTextSize" format="dimension"/>
         <attr name="eivTextColor" format="color"/>
+        <attr name="eivTextFillColor" format="color"/>
         <attr name="eivTextInstead" format="string"/>
+        <attr name="eivStrokeColor" format="color"/>
+        <attr name="eivStrokeFillColor" format="color"/>
+        <attr name="eivStrokeWidth" format="dimension"/>
+        <attr name="eivStrokePadding" format="dimension"/>
         <attr name="eivFillColor" format="color"/>
         <attr name="eivSingleWidth" format="dimension"/>
         <attr name="eivSingleHeight" format="dimension"/>
@@ -14,6 +19,11 @@
         <attr name="eivTextMode" format="enum">
             <enum name="normal" value="0"/>
             <enum name="separate" value="1"/>
+        </attr>
+        <attr name="eivFillMode" format="enum">
+            <enum name="normal" value="0"/>
+            <enum name="always" value="1"/>
+            <enum name="none" value="2"/>
         </attr>
     </declare-styleable>
 
@@ -31,6 +41,12 @@
         <attr name="ekbBgColorPressed" format="color"/>
         <attr name="ekbBgColorDisable" format="color"/>
         <attr name="ekbKeyHeight" format="dimension"/>
+        <attr name="ekbFuncKeyDrawable" format="reference"/>
+        <attr name="ekbBackKeyDrawable" format="reference"/>
+        <attr name="ekbInitState" format="enum">
+            <enum name="show" value="0"/>
+            <enum name="hide" value="1"/>
+        </attr>
     </declare-styleable>
 
 </resources>
